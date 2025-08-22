@@ -1,12 +1,11 @@
 from bitarray import bitarray
 
-from ieee754 import convert_float_to_ieee754_single
+from .ieee754 import convert_float_to_ieee754_single
+from .argument_error import ArgumentError
 
-class ArgumentError(Exception):
-    pass
 
 class SKRM():
-    def __init__(self, word_size: int, num_words: int, strategy: str = 'naive', num_overhead: int = 2):
+    def __init__(self, word_size: int, num_words: int, num_racetrack: int = 1, strategy: str = 'naive', num_overhead: int = 2):
         if strategy == 'pw_plus':
             self.word_size = word_size + 1
         elif strategy == 'naive' or strategy == 'pw':
@@ -15,7 +14,7 @@ class SKRM():
             raise ArgumentError("Invalid update strategy.")
         self.num_words = num_words
         self.num_overhead = num_overhead
-        self.storage = bitarray(self.word_size * (num_overhead + num_words) + num_words + 1)
+        self.storage = bitarray((self.word_size * (num_overhead + num_words) + num_words + 1) * num_racetrack)
         self.bits = len(self.storage)
 
         self.inject_latency = 1
@@ -193,99 +192,3 @@ class SKRM():
                 self.remove(target_word)
         self.shift(target_word + 1, target_word)
         self.remove(target_word)
-        
-
-# Test update from more to less
-print("Naive write:")
-test_skrm = SKRM(32, 3)
-test_skrm.visualize()
-print()
-
-test_skrm.naive_write(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.naive_write(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()
-
-print("\nPermutation-Write:")
-test_skrm = SKRM(32, 3, 'pw')
-test_skrm.visualize()
-print()
-
-test_skrm.permutation_write(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.permutation_write(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()
-
-print("\nPW+:")
-
-test_skrm = SKRM(32, 3, 'pw_plus')
-test_skrm.visualize()
-print()
-
-test_skrm.pw_plus(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.pw_plus(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()
-
-# Test update from less to more
-print("Naive write:")
-test_skrm = SKRM(32, 3)
-test_skrm.visualize()
-print()
-
-test_skrm.naive_write(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.naive_write(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()
-
-print("\nPermutation-Write:")
-
-test_skrm = SKRM(32, 3, 'pw')
-test_skrm.visualize()
-print()
-
-test_skrm.permutation_write(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.permutation_write(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()
-
-print("\nPW+:")
-
-test_skrm = SKRM(32, 3, 'pw_plus')
-test_skrm.visualize()
-print()
-
-test_skrm.pw_plus(0.125, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.pw_plus(0.124, 1)
-test_skrm.visualize()
-print()
-
-test_skrm.summarize()

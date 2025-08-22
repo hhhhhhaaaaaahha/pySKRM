@@ -5,12 +5,12 @@ def convert_float_to_ieee754_single(number: float, flip_bit: bool = False, preci
         # 32-bit IEEE 754
         packed = struct.pack('!f', number)
         bit_string = ''.join(f"{byte:08b}" for byte in packed)
-    elif precision == "double":
-        # 64-bit IEEE 754
-        packed = struct.pack('!d', number)
-        bit_string = ''.join(f"{byte:08b}" for byte in packed)
-    else:
-        raise ValueError("Precision should be 'single' or 'double.'")
+    # elif precision == "double":
+    #     # 64-bit IEEE 754
+    #     packed = struct.pack('!d', number)
+    #     bit_string = ''.join(f"{byte:08b}" for byte in packed)
+    # else:
+    #     raise ValueError("Precision should be 'single' or 'double.'")
 
     return bit_string if flip_bit == False else flip_ieee754(bit_string)
 

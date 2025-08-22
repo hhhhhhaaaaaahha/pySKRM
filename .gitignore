@@ -1,0 +1,57 @@
+# --- OS / Editor noise ---
+.DS_Store
+Thumbs.db
+# 編輯器暫存
+*.swp
+*.swo
+*~
+*.tmp
+
+# --- Python bytecode / cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments ---
+.pyskrm/
+.venv/
+venv/
+env/
+
+# --- Packaging / build artifacts ---
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# --- Test & coverage outputs ---
+.pytest_cache/
+coverage.xml
+htmlcov/
+.coverage
+.coverage.*
+.hypothesis/
+
+# --- Type checkers / linters caches (如有用) ---
+.mypy_cache/
+.pytype/
+.dmypy.json
+.ruff_cache/
+.pyre/
+
+# --- IDE settings (若團隊不想版控設定就忽略它們) ---
+.vscode/
+.idea/
+*.iml
+
+# --- Notebooks (若有用 Jupyter) ---
+.ipynb_checkpoints/
+
+# --- Logs ---
+*.log
+
+# --- Optional: 本地資料/成果（如你有放這些路徑） ---
+# data/
+# outputs/
+# reports/

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pySKRM"
+version = "0.1.0"
+description = "pySKRM: A Skyrmion Racetrack Memory (SKRM) simulator"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [{ name = "Chen-Jui Tu" }]
+license = { text = "MIT" }
+
+dependencies = ["bitarray>=2.9.2"]
+
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "build>=1.2.1",      # 本地打包
+    "twine>=5.1.1",      # 上傳 PyPI（如需）
+]
+
+[project.urls]
+Homepage = "https://github.com/hhhhhhaaaaaahha/pySKRM"
+# Issues = "https://github.com/hhhhhhaaaaaahha/pySKRM/issues" # TODO
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
