@@ -82,7 +82,4 @@ print(pyskrm.__version__)
 
 MIT（可依需求調整）
 
-
 ---
-
-如果你之後要補 `ieee754.py`、`argument_error.py` 的更完整說明或 API 文件，我可以幫你在 README 裡再加一節 **API 參考**。等你功能補得更完整、想發佈到 PyPI，再一起處理版本規則與發佈流程就好 🙌
