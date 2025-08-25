@@ -1,22 +1,39 @@
+from typing import Callable, Optional
 from bitarray import bitarray
 
 from .ieee754 import convert_float_to_ieee754_single
 from .argument_error import ArgumentError
 
 
+# Type alias for a write strategy function
+WriteFn = Callable[["SKRM", float, int], None]
+
 class SKRM():
-    def __init__(self, word_size: int, num_words: int, num_racetrack: int = 1, strategy: str = 'naive', num_overhead: int = 2):
+    def __init__(self,
+        word_size: int,
+        num_words: int,
+        num_racetrack: int = 1,
+        strategy: str = 'naive',
+        num_overhead: int = 2,
+        write_fn: Optional[WriteFn] = None,
+) -> None:
+        # --- Validate/derive word size based on strategy semantics ---
         if strategy == 'pw_plus':
             self.word_size = word_size + 1
         elif strategy == 'naive' or strategy == 'pw':
             self.word_size = word_size
         else:
             raise ArgumentError("Invalid update strategy.")
+
+
+        self.strategy = strategy
         self.num_words = num_words
         self.num_overhead = num_overhead
-        self.storage = bitarray((self.word_size * (num_overhead + num_words) + num_words + 1) * num_racetrack)
-        self.bits = len(self.storage)
 
+        # Storage layout: [ overhead | AP | word | AP | word | AP | ... | AP | overhead ] repeating on each racetrack
+        self.storage = bitarray((self.word_size * (num_overhead + num_words) + num_words + 1) * num_racetrack)
+
+        # Cost model (can be tuned externally if needed)
         self.inject_latency = 1
         self.detect_latency = 0.1
         self.remove_latency = 0.8
@@ -32,6 +49,20 @@ class SKRM():
         self.remove_count = 0
         self.shift_count = 0
 
+        # --- Strategy dispatch table (unbound functions) ---
+        dispatch: dict[str, WriteFn] = {
+            "naive": SKRM.naive_write,
+            "pw": SKRM.permutation_write,
+            "pw_plus": SKRM.pw_plus,
+        }
+
+
+        base_fn: WriteFn = write_fn if write_fn is not None else dispatch[strategy]
+        # Bind to this instance -> becomes a bound method with `self`
+        self.write: WriteFn = base_fn.__get__(self, SKRM) # type: ignore[assignment]
+
+
+    # ---------- Primitive operations ----------
     def inject(self, ap: int):
         self.inject_count += 1
         self.storage[(self.word_size + 1) * (ap + 1) - 1] = 1
@@ -56,6 +87,14 @@ class SKRM():
         else:
             raise ArgumentError("The access ports of shift operation can not be the same.")
 
+    # ---------- Convenience: swap out strategy at runtime ----------
+    def set_write_fn(self, write_fn: WriteFn) -> None:
+        """Replace the current write strategy with a new callable.
+        Make sure your callable is compatible with the current layout.
+        """
+        self.write = write_fn.__get__(self, SKRM) # bind to instance
+
+    # ---------- Visualization & accounting ----------
     def visualize(self):
         for idx, val in enumerate(self.storage):
             if idx % (self.word_size + 1) == self.word_size:
@@ -101,6 +140,7 @@ class SKRM():
         print(f"----------------------")
         self.calculate_energy()
     
+    # ---------- Built-in strategies (kept as instance methods) ----------
     def naive_write(self, number: float, target_word: int):
         ieee_num = convert_float_to_ieee754_single(number)
 
