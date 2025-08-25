@@ -1,7 +1,7 @@
 # --- OS / Editor noise ---
 .DS_Store
 Thumbs.db
-# 編輯器暫存
+# Compiler cache
 *.swp
 *.swo
 *~
@@ -33,7 +33,7 @@ htmlcov/
 .coverage.*
 .hypothesis/
 
-# --- Type checkers / linters caches (如有用) ---
+# --- Type checkers / linters caches ---
 .mypy_cache/
 .pytype/
 .dmypy.json
@@ -45,13 +45,13 @@ htmlcov/
 .idea/
 *.iml
 
-# --- Notebooks (若有用 Jupyter) ---
+# --- Notebooks ---
 .ipynb_checkpoints/
 
 # --- Logs ---
 *.log
 
-# --- Optional: 本地資料/成果（如你有放這些路徑） ---
+# --- Local data ---
 # data/
 # outputs/
 # reports/
