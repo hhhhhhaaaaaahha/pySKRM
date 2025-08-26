@@ -64,18 +64,34 @@ class SKRM():
 
     # ---------- Primitive operations ----------
     def inject(self, ap: int):
+        # Boundary test
+        if ap < 0 or ap > self.num_words:
+            raise ArgumentError("AP must be must be between 0 and num_words.")
+        
         self.inject_count += 1
         self.storage[(self.word_size + 1) * (ap + 1) - 1] = 1
         
     def detect(self, ap: int):
+        # Boundary test
+        if ap < 0 or ap > self.num_words:
+            raise ArgumentError("AP must be must be between 0 and num_words.")
+        
         self.detect_count += 1
         return self.storage[(self.word_size + 1) * (ap + 1) - 1]
 
     def remove(self, ap: int):
+        # Boundary test
+        if ap < 0 or ap > self.num_words:
+            raise ArgumentError("AP must be must be between 0 and num_words.")
+        
         self.remove_count += 1
         self.storage[(self.word_size + 1) * (ap + 1) - 1] = 0
 
     def shift(self, start_ap: int, end_ap: int):
+        # Boundary test
+        if start_ap < 0 or start_ap > self.num_words or end_ap < 0 or end_ap > self.num_words:
+            raise ArgumentError("AP must be must be between 0 and num_words.")
+        
         if start_ap < end_ap:
             self.shift_count += 1
             self.storage[(self.word_size + 1) * (start_ap + 1) : (self.word_size + 1) * (end_ap + 1)] = self.storage[(self.word_size + 1) * (start_ap + 1) - 1 : (self.word_size + 1) * (end_ap + 1) - 1]
@@ -144,7 +160,7 @@ class SKRM():
     def naive_write(self, number: float, target_word: int):
         # Boundary test
         if target_word < 0 or target_word > self.num_words - 1:
-            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+            raise ArgumentError("Target word must be must be between 0 and (num_words - 1).")
 
         # Init value
         ieee_num = convert_float_to_ieee754_single(number)
@@ -163,7 +179,7 @@ class SKRM():
     def permutation_write(self, number: float, target_word: int):
         # Boundary test
         if target_word < 0 or target_word > self.num_words - 1:
-            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+            raise ArgumentError("Target word must be must be between 0 and (num_words - 1).")
         
         # Init value
         ieee_num = convert_float_to_ieee754_single(number)
@@ -197,7 +213,7 @@ class SKRM():
     def pw_plus(self, number: float, target_word: int):
         # Boundary test
         if target_word < 0 or target_word > self.num_words - 1:
-            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+            raise ArgumentError("Target word must be must be between 0 and (num_words - 1).")
 
         # Input info
         d: str = convert_float_to_ieee754_single(number, True)
