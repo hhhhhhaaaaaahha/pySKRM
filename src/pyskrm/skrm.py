@@ -142,6 +142,11 @@ class SKRM():
     
     # ---------- Built-in strategies (kept as instance methods) ----------
     def naive_write(self, number: float, target_word: int):
+        # Boundary test
+        if target_word < 0 or target_word > self.num_words - 1:
+            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+
+        # Init value
         ieee_num = convert_float_to_ieee754_single(number)
 
         # Remove
@@ -156,6 +161,10 @@ class SKRM():
             self.shift(target_word + 1, target_word)
 
     def permutation_write(self, number: float, target_word: int):
+        # Boundary test
+        if target_word < 0 or target_word > self.num_words - 1:
+            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+        
         # Init value
         ieee_num = convert_float_to_ieee754_single(number)
         sky_cnt = 0
@@ -186,6 +195,10 @@ class SKRM():
             sky_cnt -= 1
 
     def pw_plus(self, number: float, target_word: int):
+        # Boundary test
+        if target_word < 0 or target_word > self.num_words - 1:
+            raise ArgumentError("Target word must be must be between 0 and (num_word - 1).")
+
         # Input info
         d: str = convert_float_to_ieee754_single(number, True)
         d_popcnt = d.count('1')
