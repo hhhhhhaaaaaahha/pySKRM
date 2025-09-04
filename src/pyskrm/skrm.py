@@ -34,7 +34,7 @@ class SKRM():
         self.storage = bitarray((self.word_size * (num_overhead + num_words) + num_words + 1) * num_racetrack)
 
         # Cost model (can be tuned externally if needed)
-        self.inject_latency = 1
+        self.inject_latency = 1.0
         self.detect_latency = 0.1
         self.remove_latency = 0.8
         self.shift_latency = 0.5
@@ -131,13 +131,14 @@ class SKRM():
         remove_latency = self.remove_count * self.remove_latency
         shift_latency = self.shift_count * self.shift_latency
         total = inject_latency + detect_latency + remove_latency + shift_latency
+
         return (
-            f"Inject latency: {inject_latency: .1f}\n"
-            f"Detect latency: {detect_latency: .1f}\n"
-            f"Remove latency: {remove_latency: .1f}\n"
-            f"Shift latency: {shift_latency: .1f}\n"
-            f"----------------------\n"
-            f"Total latency: {total: .1f}\n"
+            "%-15s %-15s\n" % ("Inject latency:", inject_latency) +
+            "%-15s %-15s\n" % ("Detect latency:", detect_latency) +
+            "%-15s %-15s\n" % ("Remove latency:", remove_latency) +
+            "%-15s %-15s\n" % ("Shift latency:", shift_latency) +
+            f"-----------------------------\n"
+            "%-15s %-15s\n" % ("Total latency:", total)
         )
 
     def render_energy(self) -> str:
@@ -146,24 +147,33 @@ class SKRM():
         remove_energy = self.remove_count * self.remove_energy
         shift_energy = self.shift_count * self.shift_energy
         total = inject_energy + detect_energy + remove_energy + shift_energy
+
         return (
-            f"Inject energy: {inject_energy}\n"
-            f"Detect energy: {detect_energy}\n"
-            f"Remove energy: {remove_energy}\n"
-            f"Shift energy: {shift_energy}\n"
-            f"----------------------\n"
-            f"Total energy: {total}\n"
+            "%-14s %-15s\n" % ("Inject energy:", inject_energy) +
+            "%-14s %-15s\n" % ("Detect energy:", detect_energy) +
+            "%-14s %-15s\n" % ("Remove energy:", remove_energy) +
+            "%-14s %-15s\n" % ("Shift energy:", shift_energy) +
+            f"-----------------------------\n"
+            "%-14s %-15s\n" % ("Total energy:", total)
         )
 
     def render_summary(self) -> str:
         return (
-            f"Inject count: {self.inject_count}\n"
-            f"Detect count: {self.detect_count}\n"
-            f"Remove count: {self.remove_count}\n"
-            f"Shift count: {self.shift_count}\n"
-            f"----------------------\n"
-            f"{self.render_latency()}"
-            f"----------------------\n"
+            f"#############################\n"
+            f"##         Summary         ##\n"
+            f"#############################\n\n"
+            "Operation count:\n\n"
+            "%-13s %-15s\n" % ("Inject count:", self.inject_count) +
+            "%-13s %-15s\n" % ("Detect count:", self.detect_count) +
+            "%-13s %-15s\n" % ("Remove count:", self.remove_count) +
+            "%-13s %-15s\n" % ("Shift count:", self.shift_count) +
+            f"-----------------------------\n"
+            "%-13s %-15s\n\n" % ("Total count:", self.inject_count + self.detect_count+ self.remove_count + self.shift_count) +
+            f"#############################\n\n" +
+            f"Latency:\n\n"
+            f"{self.render_latency()}\n" +
+            f"#############################\n\n" +
+            f"Energy:\n\n" +
             f"{self.render_energy()}"
         )
 
