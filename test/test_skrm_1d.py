@@ -84,6 +84,11 @@ def test_primitive_operations_boundary_and_visualize(make_skrm):
         s.shift(4, 0)
     assert "AP must be must be between 0 and num_words." in str(excinfo.value)
 
+    # Shift between single AP
+    with pytest.raises(ArgumentError) as excinfo:
+        s.shift(2, 2)
+    assert "The access ports of shift operation can not be the same." in str(excinfo.value)
+
 @pytest.mark.parametrize("strategy,ws_delta", [
     ("naive", 0),
     ("pw", 0),
@@ -94,7 +99,6 @@ def test_word_size_adjusts_by_strategy(make_skrm, strategy, ws_delta):
     s = make_skrm(word_size=base, strategy=strategy)
     assert s.word_size == base + ws_delta
 
-
 def test_write_bound_and_callable(skrm_each_strategy):
     """三種策略都應該把 write 綁成 bound method 且可被呼叫。"""
     s, strategy = skrm_each_strategy
@@ -104,38 +108,7 @@ def test_write_bound_and_callable(skrm_each_strategy):
     # smoke run（不驗證內部細節，僅確保不拋例外）
     s.write(0.125, 0)
 
-
-def test_operation_count_of_update(make_skrm):
-    s = make_skrm(strategy="naive")
-
-    i0, d0, r0, sh0 = s.inject_count, s.detect_count, s.remove_count, s.shift_count
-    assert i0 == 0
-    assert d0 == 0
-    assert r0 == 0
-    assert sh0 == 0
-
-    s.write(0.125, 0)
-    i1, d1, r1, sh1 = s.inject_count, s.detect_count, s.remove_count, s.shift_count
-    assert i1 == 5
-    assert d1 == 0
-    assert r1 == 32
-    assert sh1 == 64
-    
-    s.write(0.124, 0)
-    i2, d2, r2, sh2 = s.inject_count, s.detect_count, s.remove_count, s.shift_count
-    assert i2 == 28
-    assert d2 == 0
-    assert r2 == 64
-    assert sh2 == 128
-    
-    s.write(0.125, 0)
-    i2, d2, r2, sh2 = s.inject_count, s.detect_count, s.remove_count, s.shift_count
-    assert i2 == 33
-    assert d2 == 0
-    assert r2 == 96
-    assert sh2 == 192
-
-def test_operation_count_of_update_under_naive_strategy(skrm_each_strategy):
+def test_operation_count_of_update_under_strategies(skrm_each_strategy):
     s, strategy = skrm_each_strategy
     assert strategy in ["naive", "pw", "pw_plus"]
 
@@ -163,7 +136,6 @@ def test_operation_count_of_update_under_naive_strategy(skrm_each_strategy):
         assert d1 == 33
         assert r1 == 1
         assert sh1 == 65
-
     
     s.write(0.124, 0)
     i2, d2, r2, sh2 = s.inject_count, s.detect_count, s.remove_count, s.shift_count
