@@ -45,7 +45,6 @@ def test_primitive_operations_boundary_and_visualize(make_skrm):
     s.shift(0, 1)
     assert s.render_visualization() == "00000000000000000000000000000000 |0| 00000000000000000000000000000000 |0| 00000000000000000000000000000000 |0| 00000000000000000000000000000001 |0| 00000000000000000000000000000000\n"
 
-
     # Inject out-of-bound
     with pytest.raises(ArgumentError) as excinfo:
         s.inject(-1)
@@ -88,6 +87,41 @@ def test_primitive_operations_boundary_and_visualize(make_skrm):
     with pytest.raises(ArgumentError) as excinfo:
         s.shift(2, 2)
     assert "The access ports of shift operation can not be the same." in str(excinfo.value)
+
+def test_accounting_function(make_skrm):
+    s = make_skrm(word_size=32, num_words=3)
+    s.write(0.124, 1)
+    s.write(0.125, 2)
+    latency = s.render_latency()
+    energy = s.render_energy()
+    assert latency == f"Inject latency: 28.0           \n"\
+                      f"Detect latency: 0.0            \n"\
+                      f"Remove latency: 51.2           \n"\
+                      f"Shift latency:  64.0           \n"\
+                      f"-----------------------------\n"\
+                      f"Total latency:  143.2          \n"
+    assert energy == f"Inject energy: 5600           \n"\
+                     f"Detect energy: 0              \n"\
+                     f"Remove energy: 1280           \n"\
+                     f"Shift energy:  2560           \n"\
+                     f"-----------------------------\n"\
+                     f"Total energy:  9440           \n"
+    assert s.render_summary() == f"#############################\n"\
+                                 f"##         Summary         ##\n"\
+                                 f"#############################\n\n"\
+                                 f"Operation count:\n\n"\
+                                 f"Inject count: 28             \n"\
+                                 f"Detect count: 0              \n"\
+                                 f"Remove count: 64             \n"\
+                                 f"Shift count:  128            \n"\
+                                 f"-----------------------------\n"\
+                                 f"Total count:  220            \n\n"\
+                                 "#############################\n\n"\
+                                 f"Latency:\n\n{latency}\n"\
+                                 "#############################\n\n"\
+                                 f"Energy:\n\n{energy}"\
+                            
+                            
 
 @pytest.mark.parametrize("strategy,ws_delta", [
     ("naive", 0),
@@ -172,4 +206,4 @@ def test_operation_count_of_update_under_strategies(skrm_each_strategy):
         assert i3 == i2 + 0
         assert d3 == d2 + 12
         assert r3 == r2 + 33 + 1
-        assert sh3 == sh2 + (68 - 21) # 0: Index of flip-bit
+        assert sh3 == sh2 + (68 - 21)
