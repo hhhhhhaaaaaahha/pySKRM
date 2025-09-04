@@ -1,32 +1,24 @@
+import os
+import sys
 import pytest
+
 from pyskrm import SKRM
 
-# 工廠：每次呼叫回傳一個新的 SKRM，避免狀態汙染
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SRC = os.path.join(ROOT, "src")
+if SRC not in sys.path:
+    sys.path.insert(0, SRC)
+
 @pytest.fixture
-def skrm_factory():
-    def _make(word_size=8, num_words=2, strategy="naive", num_racetrack=1, num_overhead=2):
-        return SKRM(word_size=word_size,
-                    num_words=num_words,
-                    num_racetrack=num_racetrack,
-                    strategy=strategy,
-                    num_overhead=num_overhead)
+def make_skrm():
+    """Factory: Use make_skrm(strategy='pw_plus', num_racetrack=4, ...) to construct SKRM。"""
+    def _make(**kw):
+        params = dict(word_size=32, num_words=3, strategy="naive")
+        params.update(kw)
+        return SKRM(**params)
     return _make
 
-# 常用的三種策略，各自一個乾淨實例（function-scope，預設）
-@pytest.fixture
-def skrm_naive(skrm_factory):
-    return skrm_factory(strategy="naive")
-
-@pytest.fixture
-def skrm_pw(skrm_factory):
-    return skrm_factory(strategy="pw")
-
-@pytest.fixture
-def skrm_pw_plus(skrm_factory):
-    # 注意：pw_plus 內部會把 word_size + 1
-    return skrm_factory(strategy="pw_plus")
-
-# 自動套用：關閉計算/摘要時的 print 噪音（若你有測這些方法）
-@pytest.fixture(autouse=True)
-def _silence_print(monkeypatch):
-    monkeypatch.setattr("builtins.print", lambda *a, **k: None)
+@pytest.fixture(params=["naive", "pw", "pw_plus"])
+def skrm_each_strategy(make_skrm, request):
+    """The instances of three strategies of SKRM"""
+    return make_skrm(strategy=request.param), request.param
