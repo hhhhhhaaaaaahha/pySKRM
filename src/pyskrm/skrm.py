@@ -111,50 +111,73 @@ class SKRM():
         self.write = write_fn.__get__(self, SKRM) # bind to instance
 
     # ---------- Visualization & accounting ----------
-    def visualize(self):
+    # --- Render function: Only produce string ---
+    def render_visualization(self) -> str:
+        parts = []
+        line = []
         for idx, val in enumerate(self.storage):
             if idx % (self.word_size + 1) == self.word_size:
-                print(f" |", end='')
-            print(val, end='')
+                line.append(" |")
+            line.append(str(int(val)))
             if idx % (self.word_size + 1) == self.word_size:
-                print(f"| ", end='')
-        print("")
+                line.append("| ")
+        parts.append("".join(line))
+        parts.append("\n")
+        return "".join(parts)
 
-    def calculate_latency(self):
+    def render_latency(self) -> str:
         inject_latency = self.inject_count * self.inject_latency
         detect_latency = self.detect_count * self.detect_latency
         remove_latency = self.remove_count * self.remove_latency
         shift_latency = self.shift_count * self.shift_latency
+        total = inject_latency + detect_latency + remove_latency + shift_latency
+        return (
+            f"Inject latency: {inject_latency: .1f}\n"
+            f"Detect latency: {detect_latency: .1f}\n"
+            f"Remove latency: {remove_latency: .1f}\n"
+            f"Shift latency: {shift_latency: .1f}\n"
+            f"----------------------\n"
+            f"Total latency: {total: .1f}\n"
+        )
 
-        print(f"Inject latency: {inject_latency: .1f}")
-        print(f"Detect latency: {detect_latency: .1f}")
-        print(f"Remove latency: {remove_latency: .1f}")
-        print(f"Shift latency: {shift_latency: .1f}")
-        print(f"----------------------")
-        print(f"Total latency: {inject_latency + detect_latency + remove_latency + shift_latency: .1f}")
-
-    def calculate_energy(self):
+    def render_energy(self) -> str:
         inject_energy = self.inject_count * self.inject_energy
         detect_energy = self.detect_count * self.detect_energy
         remove_energy = self.remove_count * self.remove_energy
         shift_energy = self.shift_count * self.shift_energy
+        total = inject_energy + detect_energy + remove_energy + shift_energy
+        return (
+            f"Inject energy: {inject_energy}\n"
+            f"Detect energy: {detect_energy}\n"
+            f"Remove energy: {remove_energy}\n"
+            f"Shift energy: {shift_energy}\n"
+            f"----------------------\n"
+            f"Total energy: {total}\n"
+        )
 
-        print(f"Inject energy: {inject_energy}")
-        print(f"Detect energy: {detect_energy}")
-        print(f"Remove energy: {remove_energy}")
-        print(f"Shift energy: {shift_energy}")
-        print(f"----------------------")
-        print(f"Total energy: {inject_energy + detect_energy + remove_energy + shift_energy}")
+    def render_summary(self) -> str:
+        return (
+            f"Inject count: {self.inject_count}\n"
+            f"Detect count: {self.detect_count}\n"
+            f"Remove count: {self.remove_count}\n"
+            f"Shift count: {self.shift_count}\n"
+            f"----------------------\n"
+            f"{self.render_latency()}"
+            f"----------------------\n"
+            f"{self.render_energy()}"
+        )
+
+    def visualize(self):
+        print(self.render_visualization())
+
+    def calculate_latency(self):
+        print(self.render_latency())
+
+    def calculate_energy(self):
+        print(self.render_energy())
 
     def summarize(self):
-        print(f"Inject count: {self.inject_count}")
-        print(f"Detect count: {self.detect_count}")
-        print(f"Remove count: {self.remove_count}")
-        print(f"Shift count: {self.shift_count}")
-        print(f"----------------------")
-        self.calculate_latency()
-        print(f"----------------------")
-        self.calculate_energy()
+        print(self.render_summary())
     
     # ---------- Built-in strategies (kept as instance methods) ----------
     def naive_write(self, number: float, target_word: int):
@@ -222,7 +245,7 @@ class SKRM():
 
         # Init value
         sky_cnt = 0
-        save_assemble = 0
+        save_assemble = -1
         save_permute = d_bsr
         permute_removal = True
 
@@ -242,7 +265,9 @@ class SKRM():
         # Re-permute & inject
         idx_leftmost_bit = 0
         if save_assemble < save_permute:
+            # Clear the rest of existing Skyrmions
             for i in range(save_assemble, -1, -1):
+                self.shift(target_word, target_word + 1)
                 self.remove(target_word + 1)
             idx_leftmost_bit = d_bsr
             permute_removal = False
